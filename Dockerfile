@@ -15,6 +15,14 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=vendor /app /var/www
 
+# 🔥 IMPORTANT FIX: Laravel writable folders
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
+    && chmod -R 775 storage bootstrap/cache
+
+# 🔥 Clear cached config (prevents APP_KEY / config issues)
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
+
 EXPOSE 10000
 
 CMD php artisan serve --host=0.0.0.0 --port=10000
